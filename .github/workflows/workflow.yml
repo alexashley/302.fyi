@@ -20,7 +20,7 @@ jobs:
           fi
       - name: test
         run: |
-          make run &
+          go run main.go &
           SERVER=$!
-          trap "kill $SERVER" EXIT
-          make test
+          trap "echo 'Stopping server' && kill $SERVER" EXIT
+          go test -v 
