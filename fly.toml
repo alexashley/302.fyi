@@ -5,16 +5,13 @@ app = "autumn-wave-8062"
 kill_signal = "SIGINT"
 kill_timeout = 5
 
-[build]
-  image = "ghcr.io/alexashley/302.fyi:latest"
-
 [[services]]
   internal_port = 1234
   protocol = "tcp"
 
   [services.concurrency]
-    hard_limit = 25
-    soft_limit = 20
+    hard_limit = 150
+    soft_limit = 100
 
   [[services.ports]]
     handlers = ["http"]
@@ -24,9 +21,10 @@ kill_timeout = 5
     handlers = ["tls", "http"]
     port = "443"
 
-  [[services.tcp_checks]]
-    grace_period = "1s"
-    interval = "10s"
-    port = "8080"
-    restart_limit = 5
-    timeout = "2s"
+  [[services.http_checks]]
+    interval = 10000
+    grace_period = "5s"
+    method = "get"
+    path = "/healthz"
+    protocol = "http"
+    timeout = 2000
