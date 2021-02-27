@@ -15,6 +15,7 @@ var (
 	//go:embed config.yaml
 	configYaml []byte
 	scrambled  = "WW91bmcgZnJ5IG9mIHRyZWFjaGVyeSE="
+	reservedPaths = []string{"/healthz", "/version", "/egg"}
 )
 
 type redirect struct {
@@ -49,7 +50,7 @@ func handler(r *redirect) http.HandlerFunc {
 <pre>%s</pre>
 <a href="%s">Click me to follow the link</a>
 `
-			fmt.Fprintf(w, fmt.Sprintf(res, r.Url, r.Url))
+			_, _ = fmt.Fprintf(w, fmt.Sprintf(res, r.Url, r.Url))
 			return
 		}
 
@@ -68,6 +69,12 @@ func validateConfig(c *config) {
 
 		if _, err := url.ParseRequestURI(r.Url); err != nil {
 			log.Fatalf("%s is mapped to an invalid url: %s", r.Path, err)
+		}
+
+		for _, reserved := range reservedPaths {
+			if r.Path == reserved {
+				log.Fatalf("%s is a reserved path", reserved)
+			}
 		}
 
 		seenPaths[r.Path] = r.Url
