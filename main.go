@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"gopkg.in/yaml.v2"
+	"html/template"
 	"log"
 	"net/http"
 	"net/url"
@@ -15,7 +16,7 @@ var (
 	//go:embed config.yaml
 	configYaml    []byte
 	scrambled     = "WW91bmcgZnJ5IG9mIHRyZWFjaGVyeSE="
-	reservedPaths = []string{"/healthz", "/version", "/egg"}
+	reservedPaths = []string{"/healthz", "/version", "/egg", "/teapot"}
 	//go:embed version
 	versionFile string
 )
@@ -30,7 +31,7 @@ type config struct {
 }
 
 func healthz(w http.ResponseWriter, _ *http.Request) {
-	w.WriteHeader(http.StatusOK)
+	_, _ = fmt.Fprintf(w, "ok")
 }
 
 func egg(w http.ResponseWriter, _ *http.Request) {
@@ -38,8 +39,29 @@ func egg(w http.ResponseWriter, _ *http.Request) {
 	_, _ = w.Write(overEasy)
 }
 
-func kettle(w http.ResponseWriter, _ *http.Request) {
+func kettle(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusTeapot)
+}
+
+func index(c *config) http.HandlerFunc {
+	html := `
+<html>
+<h1>302.fyi</h1>
+<p>Try one of these:</p>
+<ul>
+{{- range .Redirects -}}
+<li>
+	<a href="{{ .Path }}">{{ .Path }}</a> (<a href="{{ .Path }}+">+</a>)
+</li>
+{{ end }}
+</ul>
+<p>To see the URL before being redirected, click the + next to each link</p>
+`
+	t := template.Must(template.New("index").Parse(html))
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		_ = t.ExecuteTemplate(w, "index", c)
+	}
 }
 
 func version(w http.ResponseWriter, _ *http.Request) {
@@ -54,7 +76,7 @@ func handler(r *redirect) http.HandlerFunc {
 			res := `
 <html>
 <pre>%s</pre>
-<a href="%s">Click me to follow the link</a>
+<a href="%s">Click here to follow the link</a>
 `
 			_, _ = fmt.Fprintf(w, fmt.Sprintf(res, r.Url, r.Url))
 			return
@@ -114,7 +136,9 @@ func main() {
 	http.HandleFunc("/egg", egg)
 
 	log.Println("Putting on the kettle...")
-	http.HandleFunc("/", kettle)
+	http.HandleFunc("/teapot", kettle)
+
+	http.HandleFunc("/", index(&c))
 
 	log.Printf("Listening on port %s", port)
 	_ = http.ListenAndServe(fmt.Sprintf(":%s", port), nil)

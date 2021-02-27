@@ -58,7 +58,7 @@ func TestEgg(t *testing.T) {
 
 func TestTeapot(t *testing.T) {
 	t.Parallel()
-	r := makeRequest(t, "/not-a-real-path")
+	r := makeRequest(t, "/teapot")
 	assert.Equal(t, http.StatusTeapot, r.StatusCode)
 }
 
@@ -66,6 +66,19 @@ func TestHealthz(t *testing.T) {
 	t.Parallel()
 	r := makeRequest(t, "/healthz")
 	assert.Equal(t, http.StatusOK, r.StatusCode)
+	assert.Equal(t, "ok", readBody(r))
+}
+
+func TestIndex(t *testing.T) {
+	t.Parallel()
+	r := makeRequest(t, "/")
+	assert.Equal(t, http.StatusOK, r.StatusCode)
+	body := readBody(r)
+	for i := range conf.Redirects {
+		r := conf.Redirects[i]
+
+		assert.True(t, strings.Contains(body, r.Path))
+	}
 }
 
 func TestRedirects(t *testing.T) {
