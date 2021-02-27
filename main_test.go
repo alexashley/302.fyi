@@ -46,14 +46,20 @@ func TestMain(m *testing.M) {
 func TestEgg(t *testing.T) {
 	t.Parallel()
 	r := makeRequest(t, "/egg")
-	assert.Equal(t, 200, r.StatusCode)
+	assert.Equal(t, http.StatusOK, r.StatusCode)
 	assert.Equal(t, "Young fry of treachery!", readBody(r))
 }
 
 func TestTeapot(t *testing.T) {
 	t.Parallel()
 	r := makeRequest(t, "/not-a-real-path")
-	assert.Equal(t, 418, r.StatusCode)
+	assert.Equal(t, http.StatusTeapot, r.StatusCode)
+}
+
+func TestHealthz(t *testing.T) {
+	t.Parallel()
+	r := makeRequest(t, "/healthz")
+	assert.Equal(t, http.StatusOK, r.StatusCode)
 }
 
 func TestRedirects(t *testing.T) {

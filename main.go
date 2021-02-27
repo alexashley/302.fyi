@@ -7,6 +7,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 )
 
@@ -25,13 +26,17 @@ type config struct {
 	Redirects []redirect
 }
 
+func healthz(w http.ResponseWriter, _ *http.Request) {
+	w.WriteHeader(http.StatusOK)
+}
+
 func egg(w http.ResponseWriter, _ *http.Request) {
 	overEasy, _ := base64.StdEncoding.DecodeString(scrambled)
 	_, _ = w.Write(overEasy)
 }
 
 func kettle(w http.ResponseWriter, _ *http.Request) {
-	w.WriteHeader(418)
+	w.WriteHeader(http.StatusTeapot)
 }
 
 func handler(r *redirect) http.HandlerFunc {
@@ -49,7 +54,23 @@ func handler(r *redirect) http.HandlerFunc {
 		}
 
 		w.Header().Set("Location", r.Url)
-		w.WriteHeader(302)
+		w.WriteHeader(http.StatusFound)
+	}
+}
+
+func validateConfig(c *config) {
+	seenPaths := map[string]string{}
+	for i := range c.Redirects {
+		r := c.Redirects[i]
+		if _, ok := seenPaths[r.Path]; ok {
+			log.Fatalf("Path %s is duplicated, mapped to %s and %s", r.Path, seenPaths[r.Path], r.Url)
+		}
+
+		if _, err := url.ParseRequestURI(r.Url); err != nil {
+			log.Fatalf("%s is mapped to an invalid url: %s", r.Path, err)
+		}
+
+		seenPaths[r.Path] = r.Url
 	}
 }
 
@@ -59,16 +80,21 @@ func main() {
 	if err := yaml.Unmarshal(configYaml, &c); err != nil {
 		log.Fatal("Unable to load config", err)
 	}
+	validateConfig(&c)
 
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "1234"
 	}
+
 	for i := range c.Redirects {
 		r := c.Redirects[i]
+
 		http.HandleFunc(r.Path, handler(&r))
 		http.HandleFunc(r.Path+"+", handler(&r))
 	}
+
+	http.HandleFunc("/healthz", healthz)
 
 	log.Println("Cracking eggs...")
 	http.HandleFunc("/egg", egg)
