@@ -23,4 +23,4 @@ jobs:
           go run main.go &
           SERVER=$!
           trap "echo 'Stopping server' && kill $SERVER" EXIT
-          go test -v 
+          CGO_ENABLED=0 go test -v
