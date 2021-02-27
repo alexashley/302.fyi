@@ -1,0 +1,13 @@
+redirects:
+  - path: /blog
+    url: https://alexashley.dev/blog
+  - path: /github
+    url: https://github.com/alexashley
+  - path: /nightcrew
+    url: https://www.youtube.com/watch?v=G4ApQrbhQp8
+  - path: /resume
+    url: https://alexashley.dev/assets/resume.pdf
+  - path: /squares
+    url: https://github.com/alexashley
+  - path: /sax
+    url: https://www.youtube.com/watch?v=mvYLovp5isw
