@@ -1,0 +1,26 @@
+name: fly
+
+on:
+  workflow_run:
+    workflows: [verify]
+    branches: [main]
+    types: [completed]
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: superfly/flyctl-actions@1.1
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        with:
+          args: "deploy"
+  test:
+    runs-on: ubuntu-latest
+    needs: deploy
+    steps:
+      - uses: actions/checkout@v2
+      - name: go test
+        run: |
+          APP_URL=https://302.fyi CGO_ENABLED=0 go test -v
