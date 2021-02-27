@@ -13,9 +13,11 @@ import (
 
 var (
 	//go:embed config.yaml
-	configYaml []byte
-	scrambled  = "WW91bmcgZnJ5IG9mIHRyZWFjaGVyeSE="
+	configYaml    []byte
+	scrambled     = "WW91bmcgZnJ5IG9mIHRyZWFjaGVyeSE="
 	reservedPaths = []string{"/healthz", "/version", "/egg"}
+	//go:embed version
+	versionFile string
 )
 
 type redirect struct {
@@ -38,6 +40,10 @@ func egg(w http.ResponseWriter, _ *http.Request) {
 
 func kettle(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusTeapot)
+}
+
+func version(w http.ResponseWriter, _ *http.Request) {
+	_, _ = w.Write([]byte(versionFile))
 }
 
 func handler(r *redirect) http.HandlerFunc {
@@ -102,6 +108,7 @@ func main() {
 	}
 
 	http.HandleFunc("/healthz", healthz)
+	http.HandleFunc("/version", version)
 
 	log.Println("Cracking eggs...")
 	http.HandleFunc("/egg", egg)

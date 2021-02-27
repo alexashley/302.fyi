@@ -17,6 +17,7 @@ var (
 	client *http.Client
 	conf   *config
 	appUrl string
+	expectedVersion string
 )
 
 func TestMain(m *testing.M) {
@@ -38,6 +39,11 @@ func TestMain(m *testing.M) {
 	appUrl = os.Getenv("APP_URL")
 	if appUrl == "" {
 		appUrl = "http://localhost:1234"
+	}
+
+	expectedVersion = os.Getenv("VERSION")
+	if expectedVersion == "" {
+		expectedVersion = "local"
 	}
 
 	os.Exit(m.Run())
@@ -85,10 +91,19 @@ func TestRevealUrl(t *testing.T) {
 			r := makeRequest(t, randomRedirect.Path+tc)
 			body := readBody(r)
 
-			assert.Equal(t, 200, r.StatusCode)
+			assert.Equal(t, http.StatusOK, r.StatusCode)
 			assert.True(t, strings.Contains(body, randomRedirect.Url))
 		})
 	}
+}
+
+func TestVersion(t *testing.T) {
+	t.Parallel()
+
+	r := makeRequest(t, "/version")
+
+	assert.Equal(t, http.StatusOK, r.StatusCode)
+	assert.Equal(t, expectedVersion, strings.TrimSpace(readBody(r)))
 }
 
 func makeRequest(t *testing.T, path string) *http.Response {
