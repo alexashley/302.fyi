@@ -1,4 +1,4 @@
-name: 302.fyi
+name: verify
 
 on:
   push:

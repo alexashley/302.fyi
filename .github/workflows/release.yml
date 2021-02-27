@@ -1,0 +1,32 @@
+name: release
+
+on:
+  workflow_run:
+    workflows: [verify]
+    branches: [main]
+    types: [completed]
+
+jobs:
+  build:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Get tag
+        id: tag
+        run: echo "::set-output name=sha::$(git rev-parse --short HEAD)"
+      - name: build-and-push
+        uses: docker/build-push-action@v1
+        with:
+          username: alexashley
+          password: ${{ secrets.GHCR_PAT }}
+          registry: ghcr.io
+          repository: alexashley/302.fyi
+          tags: "${{ steps.tag.outputs.sha }},latest"
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: deploy
+        run: |
+          echo deploy
