@@ -14,9 +14,9 @@ import (
 )
 
 var (
-	client *http.Client
-	conf   *config
-	appUrl string
+	client          *http.Client
+	conf            *config
+	appUrl          string
 	expectedVersion string
 )
 
