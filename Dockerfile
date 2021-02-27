@@ -4,7 +4,7 @@ WORKDIR /usr/src/app
 
 COPY go.mod go.sum ./
 RUN go mod download
-COPY main.go config.yaml ./
+COPY main.go config.yaml version ./
 RUN go build -o 302.fyi
 
 ###
