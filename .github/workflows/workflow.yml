@@ -1,0 +1,26 @@
+name: 302.fyi
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    container: golang:1.16.0-alpine3.13
+    steps:
+      - uses: actions/checkout@v2
+      - name: fmt check
+        run: |
+          if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then
+              echo "Run gofmt"
+              exit 1
+          fi
+      - name: test
+        run: |
+          make run &
+          SERVER=$!
+          trap "kill $SERVER" EXIT
+          make test
