@@ -73,6 +73,7 @@ func TestRevealUrl(t *testing.T) {
 	for _, tc := range []string{"?reveal", "+"} {
 		tc := tc
 		t.Run("reveal url when path ends in "+tc, func(t *testing.T) {
+			t.Parallel()
 			randomRedirect := conf.Redirects[rand.Intn(len(conf.Redirects))]
 
 			r := makeRequest(t, randomRedirect.Path+tc)
