@@ -6,7 +6,7 @@ kill_signal = "SIGINT"
 kill_timeout = 5
 
 [build]
-  image = "ghcr.io/alexashley/302.fyi:1adaa3f"
+  image = "ghcr.io/alexashley/302.fyi:latest"
 
 [[services]]
   internal_port = 1234

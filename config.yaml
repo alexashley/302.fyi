@@ -11,3 +11,5 @@ redirects:
     url: https://github.com/alexashley
   - path: /sax
     url: https://www.youtube.com/watch?v=mvYLovp5isw
+  - path: /src
+    url: https://github.com/alexashley/302.fyi
