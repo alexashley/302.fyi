@@ -64,7 +64,7 @@ func main() {
 	if port == "" {
 		port = "1234"
 	}
-	for i, _ := range c.Redirects {
+	for i := range c.Redirects {
 		r := c.Redirects[i]
 		http.HandleFunc(r.Path, handler(&r))
 		http.HandleFunc(r.Path+"+", handler(&r))

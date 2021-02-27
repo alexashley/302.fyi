@@ -17,7 +17,7 @@ run:
 	go run main.go
 
 fmt:
-	go fmt
+	gofmt -s -w .
 
 test:
 	go test -v
